@@ -1,10 +1,6 @@
 package cl.untec.springedumanager.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -17,6 +13,18 @@ public class User {
     private String username;
     private String password;
     private String role;
+
+    @OneToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
 
     public String getRole() {
         return role;
