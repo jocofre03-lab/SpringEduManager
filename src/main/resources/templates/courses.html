@@ -7,7 +7,10 @@
 <body>
 <h1>Course List</h1>
 <ul>
-    <li th:each="course : ${courseList}" th:text="${course}">Example course</li>
+    <li th:each="course : ${courseList}">
+        <span th:text="${course.name}">Name</span> -
+        <span th:text="${course.code}">Code</span>
+    </li>
 </ul>
 </body>
 </html>
