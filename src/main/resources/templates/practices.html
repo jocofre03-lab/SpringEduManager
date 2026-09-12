@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Practices</title>
+</head>
+<body>
+<h1>Practice List</h1>
+<ul>
+  <li th:each="practice : ${practiceList}">
+    <span th:text="${practice.title}">Title</span> —
+    <span th:text="${practice.description}">Description</span>
+    (Course: <span th:text="${practice.course.name}">Course Name</span>,
+    Due: <span th:text="${practice.dueDate}">Due Date</span>)
+  </li>
+</ul>
+
+<a th:href="@{/courses}">View courses</a>
+</body>
+</html>
