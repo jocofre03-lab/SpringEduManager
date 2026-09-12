@@ -42,6 +42,10 @@ public class CourseController {
         model.addAttribute("courseList", courses);
         return "courses";
     }
+    @GetMapping("/courses/new")
+    public String showCourseForm() {
+        return "course-form";
+    }
 
     @PostMapping("/courses/new")
     public String createCourse(@RequestParam String name, @RequestParam String code) {
