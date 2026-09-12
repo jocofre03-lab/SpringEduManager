@@ -20,9 +20,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/home", "/h2-console/**").permitAll()
+                        .requestMatchers("/courses/new").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form.permitAll())
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/courses", true)
+                        .permitAll()
+                )
                 .logout(logout -> logout.permitAll())
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));

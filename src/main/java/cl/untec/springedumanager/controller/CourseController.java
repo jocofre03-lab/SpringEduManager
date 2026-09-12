@@ -6,6 +6,9 @@ import cl.untec.springedumanager.repository.CourseRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 
 @Controller
@@ -38,5 +41,14 @@ public class CourseController {
 
         model.addAttribute("courseList", courses);
         return "courses";
+    }
+
+    @PostMapping("/courses/new")
+    public String createCourse(@RequestParam String name, @RequestParam String code) {
+        Course course = new Course();
+        course.setName(name);
+        course.setCode(code);
+        courseRepository.save(course);
+        return "redirect:/courses";
     }
 }

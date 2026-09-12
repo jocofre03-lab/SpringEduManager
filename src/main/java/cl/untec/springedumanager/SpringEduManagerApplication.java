@@ -24,6 +24,12 @@ public class SpringEduManagerApplication {
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole("ADMIN");
                 userRepository.save(admin);
+
+                User student = new User();
+                student.setUsername("estudiante1");
+                student.setPassword(passwordEncoder.encode("estudiante123"));
+                student.setRole("STUDENT");
+                userRepository.save(student);
             }
         };
     }
