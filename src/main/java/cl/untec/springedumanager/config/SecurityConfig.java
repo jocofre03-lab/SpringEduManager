@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/courses", false)
                         .permitAll()
                 )
+                .httpBasic(httpBasic -> {})
                 .logout(logout -> logout.permitAll())
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
@@ -44,5 +45,7 @@ public class SecurityConfig {
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
+
+
 }
 
