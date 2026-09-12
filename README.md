@@ -10,7 +10,7 @@
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.8-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-![H2](https://img.shields.io/badge/H2%20Database-0078D4?style=for-the-badge&logo=databricks&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
 
 </div>
@@ -23,6 +23,8 @@
 
 El proyecto se construyó **progresivamente, en cinco etapas**, cada una correspondiente a una lección del módulo, integrando de forma continua Maven, Spring MVC, persistencia con JPA, seguridad con Spring Security y una API REST.
 
+> 🔄 El proyecto se desarrolló inicialmente sobre **H2** (base de datos en memoria, ideal para aprender sin fricciones) y luego se migró a **MariaDB** como base de datos persistente en disco. Gracias a JPA, la migración solo requirió cambiar la configuración de conexión en `application.properties`: ninguna entidad, repositorio ni controlador tuvo que modificarse.
+
 ---
 
 ## 🧭 Tabla de contenidos
@@ -34,7 +36,7 @@ El proyecto se construyó **progresivamente, en cinco etapas**, cada una corresp
 - [Usuarios de prueba](#-usuarios-de-prueba)
 - [Rutas web disponibles](#-rutas-web-disponibles)
 - [API REST](#-api-rest)
-- [Consola de la base de datos](#-consola-de-la-base-de-datos)
+- [Base de datos](#-base-de-datos)
 - [Progreso por etapas](#-progreso-por-etapas)
 - [Autor](#-autor)
 
@@ -50,7 +52,7 @@ El proyecto se construyó **progresivamente, en cinco etapas**, cada una corresp
 | Arquitectura web | Spring MVC |
 | Motor de plantillas | Thymeleaf |
 | Persistencia | Spring Data JPA / Hibernate |
-| Base de datos | H2 (en memoria) |
+| Base de datos | MariaDB (persistente en disco) — desarrollado inicialmente sobre H2 |
 | Seguridad | Spring Security + BCrypt |
 | API | REST con JSON |
 | Control de versiones | Git + GitHub |
@@ -109,6 +111,7 @@ Student ────── User                (relación uno a uno, para el log
 ### Requisitos previos
 
 - Java 21 instalado
+- MariaDB instalado y en ejecución (por ejemplo, vía Homebrew: `brew services start mariadb`)
 - IntelliJ IDEA (o cualquier IDE compatible con Maven)
 
 ### Pasos
@@ -117,15 +120,24 @@ Student ────── User                (relación uno a uno, para el log
    ```bash
    git clone https://github.com/jocofre03-lab/SpringEduManager.git
    ```
-2. Ábrelo en IntelliJ IDEA como proyecto Maven.
-3. Espera a que Maven descargue las dependencias.
-4. Ejecuta la clase `SpringEduManagerApplication.java`.
-5. La aplicación estará disponible en:
+2. Crea la base de datos y un usuario dedicado en MariaDB:
+   ```sql
+   CREATE DATABASE springedu;
+   CREATE USER 'springuser'@'localhost' IDENTIFIED BY 'springpass123';
+   GRANT ALL PRIVILEGES ON springedu.* TO 'springuser'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+3. Ábrelo en IntelliJ IDEA como proyecto Maven.
+4. Espera a que Maven descargue las dependencias.
+5. Ejecuta la clase `SpringEduManagerApplication.java`.
+6. La aplicación estará disponible en:
    ```
    http://localhost:8080
    ```
 
-Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usuarios) si la base de datos está vacía.
+Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usuarios) si la base de datos está vacía. Las tablas se generan solas gracias a `spring.jpa.hibernate.ddl-auto=update`.
+
+> 💡 El proyecto conserva, comentada dentro de `application.properties`, la configuración original con H2. Puede reactivarse en cualquier momento comentando el bloque de MariaDB y descomentando el de H2, sin tocar ninguna otra parte del código.
 
 ---
 
@@ -178,19 +190,26 @@ Si un recurso no existe, la API responde con un código **404** claro (`CourseNo
 
 ---
 
-## 🗄️ Consola de la base de datos
+## 🗄️ Base de datos
 
-Con la aplicación en ejecución, se puede inspeccionar la base de datos H2 desde el navegador:
-
-```
-http://localhost:8080/h2-console
-```
+La aplicación se conecta a **MariaDB** mediante el siguiente datasource:
 
 | Campo | Valor |
 |---|---|
-| JDBC URL | `jdbc:h2:mem:springedu` |
-| Usuario | `sa` |
-| Contraseña | *(vacía)* |
+| JDBC URL | `jdbc:mariadb://localhost:3306/springedu` |
+| Usuario | `springuser` |
+| Contraseña | `springpass123` |
+
+Puede inspeccionarse directamente desde la terminal:
+
+```bash
+sudo mysql -u root
+USE springedu;
+SHOW TABLES;
+SELECT * FROM course;
+```
+
+> Durante el desarrollo se utilizó **H2** (en memoria, con consola web en `/h2-console`) para iterar rápidamente sin depender de un servidor externo. Esa configuración se conserva comentada en `application.properties` como referencia.
 
 ---
 
@@ -200,9 +219,10 @@ El proyecto se desarrolló siguiendo la evolución progresiva propuesta por la e
 
 - [x] **Etapa 1 — El gestor de proyectos:** proyecto Spring Boot creado con Maven.
 - [x] **Etapa 2 — Spring MVC:** controladores, vistas Thymeleaf y patrón MVC funcional.
-- [x] **Etapa 3 — Acceso a datos:** entidades JPA, repositorios y relaciones sobre base de datos H2.
+- [x] **Etapa 3 — Acceso a datos:** entidades JPA, repositorios y relaciones, desarrolladas sobre H2.
 - [x] **Etapa 4 — Spring Security:** login/logout, roles, rutas protegidas y contraseñas con BCrypt.
 - [x] **Etapa 5 — Interoperabilidad:** API REST con JSON, consumible por sistemas externos.
+- [x] **Migración de base de datos:** paso de H2 a MariaDB sin modificar entidades, repositorios ni controladores, evidenciando la independencia de motor que provee JPA.
 
 ---
 
