@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <title>Enrollments</title>
+</head>
+<body>
+<h1>Enrollment List</h1>
+<ul>
+  <li th:each="enrollment : ${enrollmentList}">
+    <span th:text="${enrollment.student.firstName}">First</span>
+    <span th:text="${enrollment.student.lastName}">Last</span>
+    — enrolled in
+    <span th:text="${enrollment.course.name}">Course</span>
+    (<span th:text="${enrollment.status}">Status</span>,
+    <span th:text="${enrollment.enrollmentDate}">Date</span>)
+  </li>
+</ul>
+
+<a th:href="@{/enrollments/new}">Enroll a new student</a>
+</body>
+</html>

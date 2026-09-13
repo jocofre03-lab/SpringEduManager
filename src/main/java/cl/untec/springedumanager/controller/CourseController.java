@@ -2,6 +2,9 @@ package cl.untec.springedumanager.controller;
 
 import cl.untec.springedumanager.model.Course;
 import cl.untec.springedumanager.service.CourseService;
+import cl.untec.springedumanager.service.EnrollmentService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +17,28 @@ import java.util.List;
 public class CourseController {
 
     private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
 
-    public CourseController(CourseService courseService) {
+    public CourseController(CourseService courseService, EnrollmentService enrollmentService) {
         this.courseService = courseService;
+        this.enrollmentService = enrollmentService;
     }
 
     @GetMapping("/courses")
-    public String listCourses(Model model) {
-        List<Course> courses = courseService.getAllCourses();
+    public String listCourses(Model model, Authentication authentication) {
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN"));
+
+        List<Course> courses;
+        if (isAdmin) {
+            courses = courseService.getAllCourses();
+        } else {
+            String email = authentication.getName();
+            courses = enrollmentService.getCoursesForStudentEmail(email);
+        }
+
         model.addAttribute("courseList", courses);
         return "courses";
     }

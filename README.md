@@ -23,7 +23,7 @@
 
 El proyecto se construyó **progresivamente, en cinco etapas**, cada una correspondiente a una lección del módulo, integrando de forma continua Maven, Spring MVC, persistencia con JPA, seguridad con Spring Security y una API REST.
 
-> 🔄 El proyecto se desarrolló inicialmente sobre **H2** (base de datos en memoria, ideal para aprender sin fricciones) y luego se migró a **MariaDB** como base de datos persistente en disco. Gracias a JPA, la migración solo requirió cambiar la configuración de conexión en `application.properties`: ninguna entidad, repositorio ni controlador tuvo que modificarse.
+> 🔄 El proyecto se desarrolló inicialmente sobre **H2** (base de datos en memoria) y luego se migró a **MariaDB** como base de datos persistente en disco, para practicar la conexión a un motor externo real. Gracias a JPA, la migración solo requirió cambiar la configuración de conexión en `application.properties`: ninguna entidad, repositorio ni controlador tuvo que modificarse. **Para esta entrega, la configuración activa es H2**, de modo que el proyecto se ejecute de inmediato al clonarlo, sin depender de un servidor de base de datos externo instalado en la máquina de quien lo revise. La configuración de MariaDB queda comentada y documentada en la sección [Base de datos](#-base-de-datos) para quien quiera probarla.
 
 ---
 
@@ -52,7 +52,7 @@ El proyecto se construyó **progresivamente, en cinco etapas**, cada una corresp
 | Arquitectura web | Spring MVC |
 | Motor de plantillas | Thymeleaf |
 | Persistencia | Spring Data JPA / Hibernate |
-| Base de datos | MariaDB (persistente en disco) — desarrollado inicialmente sobre H2 |
+| Base de datos | H2 (en memoria, activa para la entrega) — también migrado y probado con MariaDB |
 | Seguridad | Spring Security + BCrypt |
 | API | REST con JSON |
 | Control de versiones | Git + GitHub |
@@ -105,7 +105,7 @@ Course  ──────< Evaluation >──────  Student   (la nota d
 Student ────── User                (relación uno a uno, para el login)
 ```
 
-> 📌 **Limitación conocida:** la entidad `Enrollment` está modelada y persistida, pero aún no cuenta con una interfaz para inscribir estudiantes en cursos. En consecuencia, las vistas `/courses`, `/practices` y `/evaluations` muestran el listado completo del sistema para cualquier usuario autenticado, en vez de filtrarlo por el estudiante que inició sesión. Implementar la inscripción vía `Enrollment` y filtrar estas vistas por el usuario autenticado queda como mejora futura.
+> ✅ **Inscripciones y visibilidad por rol:** un usuario **ADMIN** puede inscribir estudiantes en cursos desde `/enrollments/new`, usando la entidad `Enrollment`. A partir de esa inscripción, las vistas `/courses`, `/practices` y `/evaluations` se comportan según el rol de quien inició sesión: un **ADMIN** ve el listado completo del sistema, mientras que un **STUDENT** ve únicamente los cursos en los que está inscrito, las prácticas de esos cursos, y sus propias evaluaciones — nunca la información de otros estudiantes.
 
 ---
 
@@ -114,8 +114,8 @@ Student ────── User                (relación uno a uno, para el log
 ### Requisitos previos
 
 - Java 21 instalado
-- MariaDB instalado y en ejecución (por ejemplo, vía Homebrew: `brew services start mariadb`)
 - IntelliJ IDEA (o cualquier IDE compatible con Maven)
+- No requiere instalar ninguna base de datos externa: la entrega usa **H2** en memoria
 
 ### Pasos
 
@@ -123,24 +123,23 @@ Student ────── User                (relación uno a uno, para el log
    ```bash
    git clone https://github.com/jocofre03-lab/SpringEduManager.git
    ```
-2. Crea la base de datos y un usuario dedicado en MariaDB:
-   ```sql
-   CREATE DATABASE springedu;
-   CREATE USER 'springuser'@'localhost' IDENTIFIED BY 'springpass123';
-   GRANT ALL PRIVILEGES ON springedu.* TO 'springuser'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
-3. Ábrelo en IntelliJ IDEA como proyecto Maven.
-4. Espera a que Maven descargue las dependencias.
-5. Ejecuta la clase `SpringEduManagerApplication.java`.
-6. La aplicación estará disponible en:
+2. Ábrelo en IntelliJ IDEA como proyecto Maven.
+3. Espera a que Maven descargue las dependencias.
+4. Ejecuta la clase `SpringEduManagerApplication.java`.
+5. La aplicación estará disponible en:
    ```
    http://localhost:8080
    ```
 
 Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usuarios) si la base de datos está vacía. Las tablas se generan solas gracias a `spring.jpa.hibernate.ddl-auto=update`.
 
-> 💡 El proyecto conserva, comentada dentro de `application.properties`, la configuración original con H2. Puede reactivarse en cualquier momento comentando el bloque de MariaDB y descomentando el de H2, sin tocar ninguna otra parte del código.
+> 💡 El proyecto conserva, comentada dentro de `application.properties`, la configuración de conexión a **MariaDB** usada durante el desarrollo. Para probarla, se requiere tener MariaDB instalado y en ejecución (por ejemplo, vía Homebrew: `brew services start mariadb`), crear la base de datos y un usuario dedicado, y luego comentar el bloque de H2 y descomentar el de MariaDB — sin tocar ninguna otra parte del código:
+> ```sql
+> CREATE DATABASE springedu;
+> CREATE USER 'springuser'@'localhost' IDENTIFIED BY 'springpass123';
+> GRANT ALL PRIVILEGES ON springedu.* TO 'springuser'@'localhost';
+> FLUSH PRIVILEGES;
+> ```
 
 ---
 
@@ -165,15 +164,18 @@ Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usua
 | `/students` | GET | Lista de estudiantes registrados | Autenticado |
 | `/students/new` | GET | Formulario de registro de estudiantes | Autenticado |
 | `/students/new` | POST | Procesa el registro (contraseña propia + valida email duplicado) | Autenticado |
-| `/courses` | GET | Lista de cursos | Autenticado |
+| `/courses` | GET | Cursos: **todos** si es ADMIN, solo los inscritos si es STUDENT | Autenticado |
 | `/courses/new` | GET | Formulario de creación de cursos | Solo `ADMIN` |
 | `/courses/new` | POST | Procesa la creación de un curso | Solo `ADMIN` |
-| `/practices` | GET | Lista de prácticas (con su curso asociado) | Autenticado |
-| `/evaluations` | GET | Lista de evaluaciones (con curso y estudiante) | Autenticado |
+| `/enrollments` | GET | Lista de todas las inscripciones | Solo `ADMIN` |
+| `/enrollments/new` | GET | Formulario para inscribir un estudiante en un curso | Solo `ADMIN` |
+| `/enrollments/new` | POST | Procesa la inscripción | Solo `ADMIN` |
+| `/practices` | GET | Prácticas: **todas** si es ADMIN, solo las de sus cursos si es STUDENT | Autenticado |
+| `/evaluations` | GET | Evaluaciones: **todas** si es ADMIN, solo las propias si es STUDENT | Autenticado |
 | `/login` | GET | Formulario de inicio de sesión | Público |
 | `/logout` | POST | Cerrar sesión | Autenticado |
 
-> 📝 Si un estudiante intenta registrarse con un email ya existente, el formulario muestra un mensaje de error y no crea un registro duplicado. Si un usuario sin rol `ADMIN` intenta acceder a `/courses/new`, Spring Security responde con **403 Forbidden**.
+> 📝 Si un estudiante intenta registrarse con un email ya existente, el formulario muestra un mensaje de error y no crea un registro duplicado. Si un usuario sin rol `ADMIN` intenta acceder a `/courses/new` o `/enrollments/**`, Spring Security responde con **403 Forbidden**.
 
 ---
 
@@ -205,7 +207,23 @@ Si un recurso no existe, la API responde con un código **404** claro (`CourseNo
 
 ## 🗄️ Base de datos
 
-La aplicación se conecta a **MariaDB** mediante el siguiente datasource:
+**Para esta entrega**, la aplicación usa **H2** en memoria, para que cualquiera pueda clonar el repositorio y ejecutarlo sin instalar nada externo. Puede inspeccionarse desde el navegador, con la app en ejecución:
+
+```
+http://localhost:8080/h2-console
+```
+
+| Campo | Valor |
+|---|---|
+| JDBC URL | `jdbc:h2:mem:springedu` |
+| Usuario | `sa` |
+| Contraseña | *(vacía)* |
+
+> ⚠️ Al ser una base en memoria, los datos se reinician cada vez que se detiene la aplicación.
+
+### Alternativa: MariaDB (usada durante el desarrollo)
+
+El proyecto también fue migrado y probado con **MariaDB** como base de datos persistente en disco. La configuración queda comentada en `application.properties`; para activarla, ver los pasos en [Cómo ejecutar el proyecto](#-cómo-ejecutar-el-proyecto).
 
 | Campo | Valor |
 |---|---|
@@ -221,8 +239,6 @@ USE springedu;
 SHOW TABLES;
 SELECT * FROM course;
 ```
-
-> Durante el desarrollo se utilizó **H2** (en memoria, con consola web en `/h2-console`) para iterar rápidamente sin depender de un servidor externo. Esa configuración se conserva comentada en `application.properties` como referencia.
 
 ---
 

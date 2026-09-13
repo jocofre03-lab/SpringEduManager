@@ -21,6 +21,16 @@ public class PracticeService {
     }
 
     public List<Practice> getAllPractices() {
+        ensureSeedData();
+        return practiceRepository.findAll();
+    }
+
+    public List<Practice> getPracticesForCourses(List<Course> courses) {
+        ensureSeedData();
+        return practiceRepository.findByCourseIn(courses);
+    }
+
+    private void ensureSeedData() {
         if (practiceRepository.count() == 0) {
             Course javaCourse = courseRepository.findAll().stream()
                     .filter(c -> c.getCode().equals("JAVA-001"))
@@ -36,6 +46,5 @@ public class PracticeService {
                 practiceRepository.save(practice1);
             }
         }
-        return practiceRepository.findAll();
     }
 }

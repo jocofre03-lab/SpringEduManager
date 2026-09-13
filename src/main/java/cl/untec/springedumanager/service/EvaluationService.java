@@ -9,6 +9,7 @@ import cl.untec.springedumanager.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -45,5 +46,11 @@ public class EvaluationService {
             }
         }
         return evaluationRepository.findAll();
+    }
+
+    public List<Evaluation> getEvaluationsForStudentEmail(String email) {
+        return studentRepository.findByEmail(email)
+                .map(evaluationRepository::findByStudent)
+                .orElse(Collections.emptyList());
     }
 }
