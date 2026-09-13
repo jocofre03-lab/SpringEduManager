@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Evaluations</title>
 </head>
 <body>
-$END$
+<h1>Evaluation List</h1>
+<ul>
+    <li th:each="evaluation : ${evaluationList}">
+        <span th:text="${evaluation.title}">Title</span> —
+        Score: <span th:text="${evaluation.score}">Score</span>,
+        Date: <span th:text="${evaluation.date}">Date</span>
+        (Course: <span th:text="${evaluation.course.name}">Course Name</span>,
+        Student: <span th:text="${evaluation.student.firstName}">First</span>
+        <span th:text="${evaluation.student.lastName}">Last</span>)
+    </li>
+</ul>
+<a th:href="@{/courses}">View courses</a>
 </body>
 </html>

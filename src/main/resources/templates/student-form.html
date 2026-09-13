@@ -2,11 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
   <title>Student Registration</title>
 </head>
 <body>
 <h1>Register a New Student</h1>
-<p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red;"></p>
+<p th:if="${errorMessage}" th:text="${errorMessage}" style="color: #e86f6f;"></p>
 
 <form th:action="@{/students/new}" method="post">
   <label for="firstName">First Name:</label>
