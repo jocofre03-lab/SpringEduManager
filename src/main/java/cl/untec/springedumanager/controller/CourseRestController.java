@@ -1,8 +1,7 @@
 package cl.untec.springedumanager.controller;
 
-import cl.untec.springedumanager.exception.CourseNotFoundException;
 import cl.untec.springedumanager.model.Course;
-import cl.untec.springedumanager.repository.CourseRepository;
+import cl.untec.springedumanager.service.CourseService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,39 +10,34 @@ import java.util.List;
 @RequestMapping("/api/v1/courses")
 public class CourseRestController {
 
-    private final CourseRepository courseRepository;
+    private final CourseService courseService;
 
-    public CourseRestController(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
+    public CourseRestController(CourseService courseService) {
+        this.courseService = courseService;
     }
 
     @GetMapping
     public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+        return courseService.getAllCourses();
     }
 
     @GetMapping("/{id}")
     public Course getCourseById(@PathVariable Long id) {
-        return courseRepository.findById(id)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
+        return courseService.getCourseById(id);
     }
 
     @PostMapping
     public Course createCourse(@RequestBody Course course) {
-        return courseRepository.save(course);
+        return courseService.createCourse(course);
     }
 
     @PutMapping("/{id}")
     public Course updateCourse(@PathVariable Long id, @RequestBody Course updatedCourse) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + id));
-        course.setName(updatedCourse.getName());
-        course.setCode(updatedCourse.getCode());
-        return courseRepository.save(course);
+        return courseService.updateCourse(id, updatedCourse);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCourse(@PathVariable Long id) {
-        courseRepository.deleteById(id);
+        courseService.deleteCourse(id);
     }
 }

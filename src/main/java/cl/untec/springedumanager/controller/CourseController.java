@@ -1,8 +1,7 @@
 package cl.untec.springedumanager.controller;
 
-
 import cl.untec.springedumanager.model.Course;
-import cl.untec.springedumanager.repository.CourseRepository;
+import cl.untec.springedumanager.service.CourseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,34 +13,19 @@ import java.util.List;
 @Controller
 public class CourseController {
 
-    private final CourseRepository courseRepository;
+    private final CourseService courseService;
 
-    public CourseController(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
+    public CourseController(CourseService courseService) {
+        this.courseService = courseService;
     }
 
     @GetMapping("/courses")
     public String listCourses(Model model) {
-
-        // Guardamos cursos de prueba solo si la base de datos está vacía
-        if (courseRepository.count() == 0) {
-            Course java = new Course();
-            java.setName("Java");
-            java.setCode("JAVA-001");
-            courseRepository.save(java);
-
-            Course spring = new Course();
-            spring.setName("Spring Boot");
-            spring.setCode("SPRING-001");
-            courseRepository.save(spring);
-        }
-
-        // Leemos todos los cursos desde la base de datos
-        List<Course> courses = courseRepository.findAll();
-
+        List<Course> courses = courseService.getAllCourses();
         model.addAttribute("courseList", courses);
         return "courses";
     }
+
     @GetMapping("/courses/new")
     public String showCourseForm() {
         return "course-form";
@@ -49,10 +33,7 @@ public class CourseController {
 
     @PostMapping("/courses/new")
     public String createCourse(@RequestParam String name, @RequestParam String code) {
-        Course course = new Course();
-        course.setName(name);
-        course.setCode(code);
-        courseRepository.save(course);
+        courseService.createCourse(name, code);
         return "redirect:/courses";
     }
 }
