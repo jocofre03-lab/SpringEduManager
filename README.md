@@ -19,7 +19,7 @@
 
 ## 📖 Descripción
 
-**SpringEduManager** es una aplicación web interna pensada para la Coordinación Académica de un bootcamp. Permite que los estudiantes se registren, visualicen sus cursos, revisen sus prácticas y consulten sus evaluaciones, centralizando información que antes vivía dispersa en hojas de cálculo y formularios aislados.
+**SpringEduManager** es una aplicación web interna pensada para la Coordinación Académica de un bootcamp. Permite que los estudiantes se **registren** mediante un formulario web, **visualicen sus cursos**, **revisen sus prácticas** y **consulten sus evaluaciones**, centralizando información que antes vivía dispersa en hojas de cálculo y formularios aislados. Un usuario con rol **ADMIN** puede además crear nuevos cursos desde un formulario protegido.
 
 El proyecto se construyó **progresivamente, en cinco etapas**, cada una correspondiente a una lección del módulo, integrando de forma continua Maven, Spring MVC, persistencia con JPA, seguridad con Spring Security y una API REST.
 
@@ -157,10 +157,18 @@ Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usua
 | Ruta | Método | Descripción | Acceso |
 |---|---|---|---|
 | `/home` | GET | Página de inicio | Público |
-| `/courses` | GET | Lista de cursos (vista HTML) | Autenticado |
-| `/courses/new` | POST | Crear un curso nuevo | Solo `ADMIN` |
+| `/students` | GET | Lista de estudiantes registrados | Autenticado |
+| `/students/new` | GET | Formulario de registro de estudiantes | Autenticado |
+| `/students/new` | POST | Procesa el registro (valida email duplicado) | Autenticado |
+| `/courses` | GET | Lista de cursos | Autenticado |
+| `/courses/new` | GET | Formulario de creación de cursos | Solo `ADMIN` |
+| `/courses/new` | POST | Procesa la creación de un curso | Solo `ADMIN` |
+| `/practices` | GET | Lista de prácticas (con su curso asociado) | Autenticado |
+| `/evaluations` | GET | Lista de evaluaciones (con curso y estudiante) | Autenticado |
 | `/login` | GET | Formulario de inicio de sesión | Público |
 | `/logout` | POST | Cerrar sesión | Autenticado |
+
+> 📝 Si un estudiante intenta registrarse con un email ya existente, el formulario muestra un mensaje de error y no crea un registro duplicado. Si un usuario sin rol `ADMIN` intenta acceder a `/courses/new`, Spring Security responde con **403 Forbidden**.
 
 ---
 
