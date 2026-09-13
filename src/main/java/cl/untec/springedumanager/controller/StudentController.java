@@ -35,6 +35,7 @@ public class StudentController {
     public String registerStudent(@RequestParam String firstName,
                                   @RequestParam String lastName,
                                   @RequestParam String email,
+                                  @RequestParam String password,
                                   Model model) {
 
         if (studentService.emailExists(email)) {
@@ -42,7 +43,7 @@ public class StudentController {
             return "student-form";
         }
 
-        studentService.registerStudent(firstName, lastName, email);
+        studentService.registerStudent(firstName, lastName, email, password);
         return "redirect:/students";
     }
 }

@@ -72,10 +72,11 @@ src/main/java/cl/untec/springedumanager/
 ├── exception/        → Excepciones personalizadas
 ├── model/             → Entidades JPA (las tablas de la base de datos)
 ├── repository/        → Repositorios Spring Data JPA
-├── service/            → Lógica de negocio (autenticación de usuarios)
+├── service/            → Lógica de negocio (Course, Student, Practice, Evaluation, autenticación)
 └── SpringEduManagerApplication.java   → Clase principal
 
 src/main/resources/
+├── static/css/       → Hoja de estilos (style.css)
 ├── templates/        → Vistas HTML (Thymeleaf)
 └── application.properties   → Configuración de la app y la base de datos
 ```
@@ -150,6 +151,8 @@ Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usua
 
 > ⚠️ Solo un usuario con rol **ADMIN** puede crear nuevos cursos (`/courses/new`). Las contraseñas se almacenan encriptadas con **BCrypt**, nunca en texto plano.
 
+> 🔐 Al registrarse desde `/students/new`, cada estudiante define su propio email (como nombre de usuario) y contraseña (mínimo 6 caracteres), guardada siempre encriptada con **BCrypt**. Se crea automáticamente un `User` con rol `STUDENT`, vinculado a su `Student` mediante la relación `@OneToOne`, permitiéndole iniciar sesión de inmediato para consultar sus cursos, prácticas y evaluaciones.
+
 ---
 
 ## 🌐 Rutas web disponibles
@@ -159,7 +162,7 @@ Al arrancar, la aplicación crea automáticamente datos de prueba (cursos y usua
 | `/home` | GET | Página de inicio | Público |
 | `/students` | GET | Lista de estudiantes registrados | Autenticado |
 | `/students/new` | GET | Formulario de registro de estudiantes | Autenticado |
-| `/students/new` | POST | Procesa el registro (valida email duplicado) | Autenticado |
+| `/students/new` | POST | Procesa el registro (contraseña propia + valida email duplicado) | Autenticado |
 | `/courses` | GET | Lista de cursos | Autenticado |
 | `/courses/new` | GET | Formulario de creación de cursos | Solo `ADMIN` |
 | `/courses/new` | POST | Procesa la creación de un curso | Solo `ADMIN` |
@@ -231,6 +234,9 @@ El proyecto se desarrolló siguiendo la evolución progresiva propuesta por la e
 - [x] **Etapa 4 — Spring Security:** login/logout, roles, rutas protegidas y contraseñas con BCrypt.
 - [x] **Etapa 5 — Interoperabilidad:** API REST con JSON, consumible por sistemas externos.
 - [x] **Migración de base de datos:** paso de H2 a MariaDB sin modificar entidades, repositorios ni controladores, evidenciando la independencia de motor que provee JPA.
+- [x] **Arquitectura en capas:** Controller → Service → Repository en todas las entidades principales, separando la lógica de negocio del manejo de peticiones web.
+- [x] **Registro con acceso automático:** cada estudiante registrado recibe credenciales de acceso vinculadas mediante la relación `User`–`Student` (`@OneToOne`).
+- [x] **Identidad visual:** hoja de estilos propia con paleta "Astral Lagoon" y tipografías Playfair Display / Lato aplicada en todas las vistas.
 
 ---
 
