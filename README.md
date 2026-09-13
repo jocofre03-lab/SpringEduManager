@@ -105,6 +105,8 @@ Course  ──────< Evaluation >──────  Student   (la nota d
 Student ────── User                (relación uno a uno, para el login)
 ```
 
+> 📌 **Limitación conocida:** la entidad `Enrollment` está modelada y persistida, pero aún no cuenta con una interfaz para inscribir estudiantes en cursos. En consecuencia, las vistas `/courses`, `/practices` y `/evaluations` muestran el listado completo del sistema para cualquier usuario autenticado, en vez de filtrarlo por el estudiante que inició sesión. Implementar la inscripción vía `Enrollment` y filtrar estas vistas por el usuario autenticado queda como mejora futura.
+
 ---
 
 ## 🚀 Cómo ejecutar el proyecto
